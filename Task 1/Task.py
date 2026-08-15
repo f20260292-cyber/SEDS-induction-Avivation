@@ -34,15 +34,15 @@ class RealTimeDepthPlotter:
         self.ax.invert_yaxis()
         self.y_upperBound = -inf
 
-        self.Sensor = DepthSensor(extra_RandomFactor=0)  # Initialize the depth sensor to read real-time data
-        self.start_time = time.time()  # Record the start time for elapsed time calculations
-
         #For adaptive denoising
         self.OldPredictedD = []
         self.currentVel = 0
 
         #DEBUG
         self.accumulatedError = 0
+
+        self.Sensor = DepthSensor(extra_RandomFactor=0)  # Initialize the depth sensor to read real-time data
+        self.start_time = time.time()  # Record the start time for elapsed time calculations
 
     def get_new_data(self):
         # (x,y) = (time elapsed since start, depth reading from sensor)
@@ -87,7 +87,7 @@ class RealTimeDepthPlotter:
         # 3. Dynamically adjust x and y axis limits to fit the growing data
         self.ax.set_xlim(max(0, t-30), t+1)
 
-        self.y_upperBound = statistics.median(self.depths[-50:])*3  # Use last 50 points for median
+        self.y_upperBound = statistics.median(self.depths[-10:])*2.5  # Use last 10 points for median
         self.ax.set_ylim(0, self.y_upperBound)  # Adjust y-axis limit based on median depth
             
 
@@ -120,6 +120,7 @@ class RealTimeDepthPlotter:
         delta_T_old = (self.times[-4] - self.times[-5])
         delta_T_new = (self.times[-1] - self.times[-4])
         self.currentVel = self.currentVel*0.9 + (delta_D / delta_T_new)*0.1
+        
         PredictedD = self.currentVel * delta_T_old + self.depths[-4]  # Simple linear prediction based on last two points
 
         self.OldPredictedD.append(PredictedD)
