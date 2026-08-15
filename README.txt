@@ -25,3 +25,7 @@ TASK 1:
         I planned on plotting everything using matplotlib and as always I asked an llm to do it -_-. I inluded features that made sense like 
         scaling based on the moving median data rather than average or max as the sensor data does contain random outliers. [it was mentioned
         that I removed the outliers previously, but this is where I implemented it]
+
+TASK 2:
+
+    Just implemented the features as dictated 
