@@ -54,43 +54,44 @@ void setup()
   AnchorState = 0;
 }
 
+
+
+
 void loop()
 {
   Time = millis();
+
+  // Anchor Control
   if (digitalRead(AnchorPin) == HIGH) {
+
     Anchor();//Toggles anchor (i.e if up -> it goes down; & vice versa)
 
     while (digitalRead(AnchorPin) == HIGH) {   //Wait till button released
       delay(1); 
     }
-
   }
   
-  if (AnchorState == 0)                                 //If achor is up, checking for possible env debuffs
+  //If achor is up, checking for possible env debuffs
+  if (AnchorState == 0)                                 
   {
-    
     //Handling Storm
   	if (analogRead(PhotoresPin) < 927 && !(isCharibydis))
-    {
-    	Storm(false); //Storm is called
-    }
-    else if (isStorm == 1) {Storm(true);}
+    {Storm(false);}                                 //Storm is called
+    else if (isStorm == 1) {Storm(true);}           //Storm is terminated
     
     //Handling Charibydis
     if (getDistance() < 100  &&  !(isStorm))
+    {Charibydis(false);}                            //Charibydis is called
+    else if (isCharibydis == 1) {Charibydis(true);} //Charibydis is terminated
+
+    //Checking for Open Sea
+    if (!(isCharibydis) && !(isStorm))
     {
-      Serial.println(getDistance());
-    	Charibydis(false);  //Charibydis is called
+      lcd_1.print("OPEN SEA");
+      Serial.println("Open Sea state");
     }
-    else if (isCharibydis == 1) {Charibydis(true);}
   }
   
-  else                                                  //If achor is down, Clearing debuffs
-  {
-    if (isStorm == 1) {Storm(true);} //Storm is Terminated
-    if (isCharibydis == 1) {Charibydis(true);} //Charibydis is Terminated 
-  
-  }
  
   lcd_1.setCursor(0, 0); //Reset LCD cursor
   delay(30);             // Wait for 30 millisecond(s)
@@ -105,6 +106,8 @@ void Anchor()
 {
 	if (AnchorState == 0)
     {
+      if (isStorm == 1) {Storm(true);} //Storm is Terminated
+      if (isCharibydis == 1) {Charibydis(true);} //Charibydis is Terminated 
       lcd_1.clear();
       lcd_1.print("ANCHOR DROPPED");
       Serial.println("ANCHOR DROPPED");
@@ -113,8 +116,7 @@ void Anchor()
   else if (AnchorState == 1)
     {
       lcd_1.clear();
-      lcd_1.print("OPEN SEA");
-      Serial.println("OPEN SEA");
+      Serial.println("ANCHOR RAISED");
       AnchorState = 0;
     }
   	
@@ -131,9 +133,8 @@ void Charibydis(bool Terminate)
       TimeSinceIncident = -1;
     	digitalWrite(BuzzerPin, LOW);
       
-     	lcd_1.clear();
-    	lcd_1.print("OPEN SEA");
-    	Serial.println("OPEN SEA");      
+     	lcd_1.clear();      
+      Serial.println("Charybdis Terminated");
      	return;
     }
   
@@ -150,7 +151,7 @@ void Charibydis(bool Terminate)
     lcd_1.print("CHARYBDIS");  //Prints Charibydis again everytime, but looks good like a blinking feature so it is a feature not a bug
     Serial.println("CHARYBDIS");
   	
-  	//Wreking if in storm for 5 sec	
+  	//Wreking if in Charibydis for 5 sec	
   	if (millis() - TimeSinceIncident >= 5000)
     {
       TimeSinceIncident = -1;
@@ -171,8 +172,7 @@ void Storm(bool Terminate)
       	digitalWrite(LED_Pin, LOW);
       	
       	lcd_1.clear();
-    	lcd_1.print("OPEN SEA");
-    	Serial.println("OPEN SEA");      
+        Serial.println("Storm Terminated");     
       	return;
     }
   
@@ -186,7 +186,7 @@ void Storm(bool Terminate)
   	
   	//LCD update
   	lcd_1.clear();
-    lcd_1.print("STORM");  //Prints storm again everytime, printing in  the above 'if Time.. == -1' should make it not blink
+    lcd_1.print("STORM");  //Prints storm again everytime, printing in  the above 'if Time.. == -1' should make it not blink if required
     Serial.println("STORM");
   	
   	//LED blinking
